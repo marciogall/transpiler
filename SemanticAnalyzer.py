@@ -19,7 +19,7 @@ class SemanticAnalyzer:
                 # If the type of the node is not an id we can insert that directly in the symTab
                 inserted = self.insert(node, self.current_scope)
                 if not inserted:
-                    print("Variable " + node.value + " redeclared.", file=sys.stderr)
+                    print(node.value + " redeclared.", file=sys.stderr)
                     self.error.append(True)
             else:
                 # If the type of the node is id, maybe it has been declared previously. We check it.
@@ -27,8 +27,11 @@ class SemanticAnalyzer:
                 if _:
                     inserted = self.insert(node, self.current_scope, self.symTable[index][1])
                     if not inserted:
-                        print("Variable " + node.value + " redeclared.", file=sys.stderr)
+                        print(+ node.value + " redeclared.", file=sys.stderr)
                         self.error.append(True)
+                else:
+                    print(node.children[0].children[0].value + " not declared.", file=sys.stderr)
+                    self.error.append(True)
         else:
             # We change the current_scope based on the function we are in
             if isinstance(node, FuncNode):
