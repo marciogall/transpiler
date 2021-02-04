@@ -14,8 +14,6 @@ reserved = {
     'return': 'RETURN',
     'True': 'T_BOOL',
     'False': 'F_BOOL',
-    'input': 'INPUT',
-
     'extend': 'EXTEND'
 }
 

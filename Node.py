@@ -38,12 +38,12 @@ class StatementNode(AST):
 
 
 class FuncNode(AST):
-    def __init__(self, name, children):
-        self.name = name
+    def __init__(self, value, children):
+        self.value = value
         self.children = children
 
     def __repr__(self):
-        return "Func Node: " + str(self.name) + " " + str(self.children.__repr__())
+        return "Func Node: " + str(self.value) + " " + str(self.children.__repr__())
 
 
 class ParamNode(AST):

@@ -13,6 +13,8 @@ def p_program(p):
     visitor = SemanticAnalyzer()
     visitor.analyze(p[0])
     print(visitor.symTable)
+    if len(visitor.error) > 0:
+        print("TranslationError: your code contains error", file=sys.stderr)
     p[0] = None
 
 
@@ -35,8 +37,10 @@ def p_statement(p):
 	| RETURN
 	| RETURN value'''
 
-    if len(p) == 2:
+    if len(p) == 2 and p[1] != "return":
         p[0] = StatementNode(children=[p[1]])
+    if len(p) == 2 and p[1] == "return":
+        p[0] = StatementNode(children=[])
     if len(p) == 3:
         p[0] = StatementNode(children=[p[2]])
 
@@ -46,9 +50,9 @@ def p_funcdef(p):
 	| DEF ID LPAR RPAR COLON INDENT statements DEDENT'''
 
     if len(p) == 10:
-        p[0] = FuncNode(children=[p[4], p[8]], name=p[2])
+        p[0] = FuncNode(children=[p[4], p[8]], value=p[2])
     if len(p) == 9:
-        p[0] = FuncNode(children=[p[7]], name=p[2])
+        p[0] = FuncNode(children=[p[7]], value=p[2])
 
 
 def p_parameters(p):
@@ -85,7 +89,7 @@ def p_call(p):
 	| ID FULLSTOP EXTEND LPAR list RPAR'''
 
     if len(p) == 4:
-        p[0] = CallNode(value=p[1],children=[])
+        p[0] = CallNode(value=p[1], children=[])
     if len(p) == 5:
         p[0] = CallNode(value=p[1], children=[p[3]])
     if len(p) == 7:
@@ -141,6 +145,7 @@ def p_expression(p):
     '''expression : value PLUS expression
 	| value MINUS expression
 	| value
+	| call
 	| list
 	| list PLUS expression
 	| tuple
@@ -194,11 +199,11 @@ def p_value(p):
 
 
     if type(p[1]) == str and p[1][0] == "\"":
-        p[0] = ValueNode(value=p[1], type="<class 'str'>")
+        p[0] = ValueNode(value=p[1], type="str")
     elif type(p[1]) == str and not p[1][0] == "\"":
-        p[0] = ValueNode(value=p[1], type="<class 'id'>")
+        p[0] = ValueNode(value=p[1], type="id")
     else:
-        p[0] = ValueNode(value=p[1], type=type(p[1]))
+        p[0] = ValueNode(value=p[1], type=type(p[1]).__name__)
 
 
 # Error rule for syntax errors
