@@ -10,12 +10,12 @@ class SemanticAnalyzer:
         self.error = []
 
     def analyze(self, node):
+        # Save a variable
         if isinstance(node, AssignNode):
+            for i in range(len(node.children[0].children)):
+                # Verify if an id inside the assign exist before.
+                self.invalid_operation(node.children[0].children[i], node.type)
             if node.type != 'id':
-                for i in range(len(node.children[0].children)):
-                    # Verify if an id exist before.
-                    self.invalid_operation(node.children[0].children[i], node.type)
-
                 # If the type of the node is not an id we can insert that directly in the symTab
                 inserted = self.insert(node, self.current_scope)
                 if not inserted:
@@ -29,9 +29,6 @@ class SemanticAnalyzer:
                     if not inserted:
                         print(+ node.value + " redeclared.", file=sys.stderr)
                         self.error.append(True)
-                else:
-                    print(node.children[0].children[0].value + " not declared.", file=sys.stderr)
-                    self.error.append(True)
         else:
             # We change the current_scope based on the function we are in
             if isinstance(node, FuncNode):

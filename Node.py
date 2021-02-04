@@ -1,16 +1,5 @@
-
 class AST:
     pass
-
-
-class ValueNode(AST):
-    def __init__(self, type, value):
-        self.type = type
-        self.value = value
-        self.children = []
-
-    def __repr__(self):
-        return "Value Node: " + str(self.type) + " " + str(self.value)
 
 
 class ProgramNode(AST):
@@ -18,7 +7,7 @@ class ProgramNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Program Node: " + str(self.children.__repr__())
+        return "ProgramNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class StatementsNode(AST):
@@ -26,7 +15,7 @@ class StatementsNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Statements Node: " + str(self.children.__repr__())
+        return " StatementsNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class StatementNode(AST):
@@ -34,7 +23,7 @@ class StatementNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Statement Node: " + str(self.children.__repr__())
+        return " StatementNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class FuncNode(AST):
@@ -43,7 +32,8 @@ class FuncNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Func Node: " + str(self.value) + " " + str(self.children.__repr__())
+        return " FuncNode{ Value: " + str(self.value) + ", Children:{"\
+               + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class ParamNode(AST):
@@ -51,7 +41,7 @@ class ParamNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Param Node: " + str(self.children.__repr__())
+        return " ParamNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class AssignsNode(AST):
@@ -59,7 +49,7 @@ class AssignsNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Assigns Node: " + str(self.children.__repr__())
+        return " AssignsNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class AssignNode(AST):
@@ -69,7 +59,8 @@ class AssignNode(AST):
         self.type = children[0].children[0].type
 
     def __repr__(self):
-        return "Assign Node: " + str(self.value) + " " + str(self.children.__repr__()) + " " + str(self.type)
+        return " AssignNode{ Value: " + str(self.value) + ", Type: " + str(self.type) + ", Children:{" \
+               + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class CallNode(AST):
@@ -78,7 +69,8 @@ class CallNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Call Node: " + str(self.value) + " " + str(self.children.__repr__())
+        return " CallNode{ Value: " + str(self.value) + ", Children:{"\
+               + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class IfNode(AST):
@@ -86,7 +78,7 @@ class IfNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "If Node: " + str(self.children.__repr__())
+        return " IfNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class WhileNode(AST):
@@ -94,7 +86,7 @@ class WhileNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "While Node: " + str(self.children.__repr__())
+        return " WhileNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class ConditionNode(AST):
@@ -106,7 +98,9 @@ class ConditionNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Condition Node: " + str(self.type) + " " + str(self.children.__repr__())
+        return " ConditionNode{ Type: " + str(self.type) + ", Children:{" \
+               + str(self.children.__repr__()).split("[")[1].split("]")[0] \
+               + "}"
 
 
 class RelopNode(AST):
@@ -115,7 +109,7 @@ class RelopNode(AST):
         self.children = []
 
     def __repr__(self):
-        return "Relop Node: " + str(self.value)
+        return " RelopNode{ Value: " + str(self.value) + "}"
 
 
 class ExprNode(AST):
@@ -123,18 +117,21 @@ class ExprNode(AST):
         self.children = children
 
     def __repr__(self):
-        return "Expr Node: " + str(self.children.__repr__())
+        return " ExprNode{ Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class ListNode(AST):
     def __init__(self, children):
         self.children = children
-        if len(children) > 1:
+        if len(children) > 0:
             self.value = children[0]
             self.type = children[0].type
+        else:
+            self.type = None
 
     def __repr__(self):
-        return "List Node: " + str(self.value) + " " + str(self.type) + " " + str(self.children.__repr__())
+        return " List Node{ Value: " + str(self.value) + " Type: " + str(self.type) \
+               + " Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class TupleNode(AST):
@@ -145,4 +142,15 @@ class TupleNode(AST):
             self.type = children[0].type
 
     def __repr__(self):
-        return "Tuple Node: " + str(self.value) + " " + str(self.type) + " " + str(self.children.__repr__())
+        return " TupleNode{ Value: " + str(self.value) + " Type: " + str(self.type) \
+               + " Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
+
+
+class ValueNode(AST):
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+        self.children = []
+
+    def __repr__(self):
+        return " ValueNode{ Type: " + str(self.type) + " Value: " + str(self.value) + "}"
