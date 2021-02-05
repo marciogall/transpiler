@@ -11,11 +11,13 @@ def p_program(p):
     if args["verbose"]:
         print(p[0])
     semantic_checker = SemanticAnalyzer()
-    semantic_checker.pre_analysis(p[0])
-    print(semantic_checker.symTable)
+    semantic_checker.analysis(p[0])
+    semantic_checker.print_symTab()
     if len(semantic_checker.error) > 0:
         semantic_checker.print_error()
-        print("TranslationError: your code contains error", file=sys.stderr)
+        print("Translation failed: your code contains error.", file=sys.stderr)
+    else:
+        print("Translation completed correctly.")
     p[0] = None
 
 

@@ -9,127 +9,91 @@ class SemanticAnalyzer:
         self.current_scope = None
         self.error = []
 
-    def pre_analysis(self, node):
-
-        # Save a variable
+    def analysis(self, node):
+        # Update the symTab.
         if isinstance(node, AssignNode):
-
+            inserted = False
+            node_type = node.type
             if node.type != 'id':
-                for i in range(len(node.children[0].children)):
-                    # Verify if an id inside the assign exist before.
-                    self.invalid_operation(node.children[0].children[i], node.type)
-
-                # If the type of the node is not an id we can insert that directly in the symTab
-                inserted = self.insert(node, self.current_scope)
-                if not inserted:
-                    self.error.append(node.value + " redeclared.")
+                inserted = self.insert(node, self.current_scope, node.type)
             else:
-
-                # If the type of the node is id, maybe it has been declared previously. We check it.
-                _, index = self.lookup(node.children[0].children[0], self.current_scope)
+                _, index = self.lookup(node, self.current_scope)
                 if _:
-                    inserted = self.insert(node, self.current_scope, self.symTable[index][1])
-                    if not inserted:
-                        self.error.append(node.value + " redeclared.")
-        else:
-
-            # We change the current_scope based on the function we are in
-            if isinstance(node, FuncNode):
-                self.current_scope = str(node.value)
-                self.insert(node=node, type="func", scope="Global", parameters=self.control_parameters(node))
-
-            # Recursion
-            for i in range(len(node.children)):
-                self.pre_analysis(node.children[i])
-
-        # Check variables in condition
-        if isinstance(node, ConditionNode):
+                    node_type = self.symTable[index][1]
+                    inserted = self.insert(node, self.current_scope, node_type)
+                if not inserted:
+                    self.error.append("Cannot resolve the type of " + node.value + ".")
             for i in range(len(node.children[0].children)):
-                self.check_condition(node.children[0].children[i])
-
-        # Check errors in the AST
-        if isinstance(node, ProgramNode):
-            self.post_analysis(node)
-
-    def post_analysis(self, node):
-
-        # We change the current_scope based on the function we are in
+                self.invalid_operation(node.children[0].children[i], node_type)
+        # Update the symTab with the formal parameters of the function to avoid conflicts.
+        if isinstance(node, ParamNode) and self.current_scope != 'main':
+            for i in range(len(node.children)):
+                if isinstance(node.children[i], ValueNode):
+                    inserted = self.insert(node.children[i], self.current_scope, type="parameter")
+        # Update the symTab with functions names.
         if isinstance(node, FuncNode):
             self.current_scope = str(node.value)
-
-        # We check the validity of an operation, based on the assumption that the correct type
-        # is the type of the first variable.
-        if isinstance(node, AssignNode):
-            _, index = self.lookup(node, self.current_scope)
-            type = self.symTable[index][1]
-
-            for i in range(len(node.children[0].children)):
-                # We created this function in order to check the children of the node without losing the type.
-                self.invalid_operation(node.children[0].children[i], type)
-
-        # Check if called function exists
-        if isinstance(node, CallNode):
-            found, _ = self.lookup(node, "Global")
-            if not found:
-                self.error.append("function " + node.value + " not defined.")
-            correct, _ = self.lookup(node, "Global", self.control_parameters(node))
-            if not correct:
-                self.error.append("Wrong number of parameters in " + node.value + " call.")
-
-        # Recursion
+            inserted = self.insert(node=node, type="func", scope="global", parameters=self.control_parameters(node))
+        # Check if a value exist in the symTab.
+        if isinstance(node, ValueNode) and node.type == 'id':
+            found, _ = self.lookup(node, self.current_scope)
+            if not found and node.value != "__name__":
+                self.error.append(node.value + " not declared.")
+        # Recursion.
         for i in range(len(node.children)):
-            self.post_analysis(node.children[i])
+            self.analysis(node.children[i])
+        # These type of control are done after the symTab is completed. We are controlling if the function
+        # exists and has the right number of parameters.
+        if isinstance(node, CallNode):
+            found, _ = self.lookup(node, "global", self.control_parameters(node))
+            if not found:
+                self.error.append("Function " + node.value + " not defined.")
 
-    # Check if a variable exists in the symTab
+    # The function returns True if the object is in the symTab, False if not, with the index.
     def lookup(self, node, scope, parameters=None):
-        if not isinstance(node, ValueNode):
-            if not isinstance(node, CallNode):
-                found, index = self.lookup(node.children[0], self.current_scope)
-                return found, index
+        if not (isinstance(node, ValueNode) or isinstance(node, CallNode) or isinstance(node, FuncNode)):
+            found, index = self.lookup(node.children[0], scope)
+            return found, index
 
-        # The function returns True if the object is in the symTab, False if not, with the index.
-        for i in range(len(self.symTable)):
-            if node.value in self.symTable[i] and (scope in self.symTable[i] or scope == "Global") \
-                    and parameters == self.symTable[i][3]:
-                found, index = True, i
-                return found, index
-        found, index = False, -1
-        return found, index
+        if isinstance(node, ValueNode):
+            for i in range(len(self.symTable)):
+                if node.value == self.symTable[i][0] and (scope == self.symTable[i][2] or scope == "global"):
+                    found, index = True, i
+                    return True, i
+            return False, -1
+        elif isinstance(node, CallNode) or isinstance(node, FuncNode):
+            for i in range(len(self.symTable)):
+                if node.value == self.symTable[i][0] and scope == "global" \
+                        and parameters == self.symTable[i][3] and self.symTable[i][1] == "func":
+                    return True, i
+            return False, -1
 
-    # Add a variable in the symTab
+    # Add a variable in the symTab.
     def insert(self, node, scope, type=None, parameters=None):
         # The function returns True if the object has been added. Type is used if the node.type is 'id'.
-        found, _ = self.lookup(node, scope)
+        found, _ = self.lookup(node, scope, parameters)
         if not found and type is None:
-            # Save a value in symTab if type not declared
+            # Save a value in symTab if type not declared.
             self.symTable.append((node.value, str(node.type), scope, parameters))
             return True
-
         elif not (found and type is None):
-            # Save a value/func in symTab if type declared
+            # Save a value/func in symTab if type declared.
             self.symTable.append((node.value, type, scope, parameters))
             return True
         else:
             return False
 
-    # Check the validity of an operation by checking if id inside it exists and have the same type
+    # Check the validity of an operation by checking if id inside it exists and have the same type.
     def invalid_operation(self, node, type=None):
-
         if isinstance(node, ValueNode):
             # Verify the type of the symbol in the symTab
             if node.type == 'id':
                 _, index = self.lookup(node, self.current_scope)
-                if not _:
-                    # Verify variable exist in analyze() function
-                    # print(node.value + " not declared.", file=sys.stderr)
-                    self.error.append(node.value + " not declared.")
-                    return
                 node_type = self.symTable[index][1]
             else:
                 node_type = node.type
             if node_type != type:
-                self.error.append("Invalid operation between " + str(type) + " and " + str(node_type))
-
+                self.error.append("Invalid operation between " + str(type) + " and " + str(node_type) + ".")
         if isinstance(node, ExprNode):
             # Recursion
             for i in range(len(node.children)):
@@ -142,18 +106,9 @@ class SemanticAnalyzer:
                 counter = self.control_parameters(node.children[i], counter)
         return counter
 
-    def check_condition(self, node):
-        # Recursive function for all the variables in condition
-        if isinstance(node, ValueNode) and node.type == 'id':
-            _, index = self.lookup(node, self.current_scope)
-            if not _:
-                self.error.append(node.value + " not declared.")
-            else:
-                type = self.symTable[index][1]
-                self.invalid_operation(node, type)
-        elif isinstance(node, ExprNode):
-            for i in range(len(node.children)):
-                self.check_condition(node.children[i])
-
     def print_error(self):
         print('\n'.join(self.error), file=sys.stderr)
+
+    def print_symTab(self):
+        for i in range(len(self.symTable)):
+            print(str(self.symTable[i]) + "\n", end="")
