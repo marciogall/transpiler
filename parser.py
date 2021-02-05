@@ -10,10 +10,11 @@ def p_program(p):
     p[0] = ProgramNode(children=[p[1]])
     if args["verbose"]:
         print(p[0])
-    visitor = SemanticAnalyzer()
-    visitor.analyze(p[0])
-    print(visitor.symTable)
-    if len(visitor.error) > 0:
+    semantic_checker = SemanticAnalyzer()
+    semantic_checker.pre_analysis(p[0])
+    print(semantic_checker.symTable)
+    if len(semantic_checker.error) > 0:
+        semantic_checker.print_error()
         print("TranslationError: your code contains error", file=sys.stderr)
     p[0] = None
 
