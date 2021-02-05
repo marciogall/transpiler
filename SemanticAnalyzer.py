@@ -87,7 +87,9 @@ class SemanticAnalyzer:
 
                 # We created this function in order to check the children of the node without losing the type.
                 self.invalid_operation(node.children[0].children[i], type)
+
         if isinstance(node, CallNode):
+            print(node)
             found, _ = self.lookup(node, "Global")
             if not found:
                 print("function " + node.value + " not defined.", file=sys.stderr)
@@ -103,7 +105,7 @@ class SemanticAnalyzer:
 
     def lookup(self, node, scope, parameters=None):
         if not isinstance(node, ValueNode):
-            if not isinstance(node, FuncNode):
+            if not isinstance(node, CallNode):
                 found, index = self.lookup(node.children[0], self.current_scope)
                 return found, index
 
@@ -165,6 +167,7 @@ class SemanticAnalyzer:
         return counter
 
     def check_condition(self, node):
+        # Recursive function for all the variables in condition
         if isinstance(node, ValueNode) and node.type == 'id':
             _, index = self.lookup(node, self.current_scope)
             if not _:
@@ -176,4 +179,3 @@ class SemanticAnalyzer:
         elif isinstance(node, ExprNode):
             for i in range(len(node.children)):
                 self.check_condition(node.children[i])
-

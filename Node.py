@@ -19,11 +19,13 @@ class StatementsNode(AST):
 
 
 class StatementNode(AST):
-    def __init__(self, children):
+    def __init__(self, children, value=None):
         self.children = children
+        self.value = value
 
     def __repr__(self):
-        return " StatementNode{ Children:{" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
+        return " StatementNode{ Value: " + str(self.value) + ", Children:{" \
+               + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class FuncNode(AST):

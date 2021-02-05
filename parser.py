@@ -35,14 +35,14 @@ def p_statement(p):
 	| call
 	| COMMENT
 	| RETURN
-	| RETURN value'''
+	| RETURN expression'''
 
     if len(p) == 2 and p[1] != "return":
         p[0] = StatementNode(children=[p[1]])
     if len(p) == 2 and p[1] == "return":
-        p[0] = StatementNode(children=[])
+        p[0] = StatementNode(children=[], value="return")
     if len(p) == 3:
-        p[0] = StatementNode(children=[p[2]])
+        p[0] = StatementNode(children=[p[2]], value="return")
 
 
 def p_funcdef(p):
