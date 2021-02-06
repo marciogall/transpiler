@@ -58,7 +58,10 @@ class AssignNode(AST):
     def __init__(self, value, children):
         self.value = value.value
         self.children = children
-        self.type = children[0].children[0].type
+        if not isinstance(children[0].children[0], CallNode):
+            self.type = children[0].children[0].type
+        else:
+            self.type = "call"
 
     def __repr__(self):
         return " AssignNode{ Value: " + str(self.value) + ", Type: " + str(self.type) + ", Children:{" \
@@ -130,29 +133,34 @@ class ListNode(AST):
             self.type = children[0].type
         else:
             self.type = None
+            self.value = None
 
     def __repr__(self):
-        return " List Node{ Value: " + str(self.value) + " Type: " + str(self.type) \
-               + " Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
+        return " List Node{ Value: " + str(self.value) + ", Type: " + str(self.type) \
+               + ", Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class TupleNode(AST):
     def __init__(self, children):
         self.children = children
-        if len(children) > 1:
+        if len(children) > 0:
             self.value = children[0]
             self.type = children[0].type
+        else:
+            self.type = None
+            self.value = None
 
     def __repr__(self):
-        return " TupleNode{ Value: " + str(self.value) + " Type: " + str(self.type) \
-               + " Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
+        return " TupleNode{ Value: " + str(self.value) + ", Type: " + str(self.type) \
+               + ", Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class ValueNode(AST):
-    def __init__(self, type, value):
+    def __init__(self, type, value, index=0):
         self.type = type
         self.value = value
         self.children = []
+        self.index = index
 
     def __repr__(self):
-        return " ValueNode{ Type: " + str(self.type) + " Value: " + str(self.value) + "}"
+        return " ValueNode{ Type: " + str(self.type) + ", Value: " + str(self.value) + ", Index: " + str(self.index) + "}"
