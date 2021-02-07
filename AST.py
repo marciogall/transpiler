@@ -99,7 +99,7 @@ class ConditionNode(AST):
         if len(children) == 3:
             self.type = children[1].value
         else:
-            self.type = children[0].children[0].value
+            self.type = None
         self.children = children
 
     def __repr__(self):

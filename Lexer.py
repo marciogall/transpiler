@@ -14,7 +14,9 @@ reserved = {
     'return': 'RETURN',
     'True': 'T_BOOL',
     'False': 'F_BOOL',
-    'extend': 'EXTEND'
+    'extend': 'EXTEND',
+    'print': 'PRINT',
+    'input': 'INPUT'
 }
 
 tokens = [
@@ -41,7 +43,8 @@ tokens = [
              'EQEQUAL',
              'LESSEQUAL',
              'FULLSTOP',
-             'STRING'
+             'STRING',
+             'TIMES'
          ] + list(reserved.values())
 
 t_EQUAL = '='
@@ -54,6 +57,7 @@ t_RSQB = '\]'
 t_COMMA = ','
 t_PLUS = '\+'
 t_MINUS = '-'
+t_TIMES = '\*'
 t_LESS = '<'
 t_GREATER = '>'
 t_NOTEQUAL = '!='

@@ -1,6 +1,7 @@
 import sys
 
-from Node import *
+from AST import *
+from Lexer import reserved
 
 
 class SemanticAnalyzer:
@@ -42,7 +43,7 @@ class SemanticAnalyzer:
         if isinstance(node, ParamNode) and self.current_scope != 'main':
             for i in range(len(node.children)):
                 if isinstance(node.children[i], ValueNode):
-                    inserted = self.insert(node=node.children[i], scope=self.current_scope, type="parameter")
+                    inserted = self.insert(node=node.children[i], scope=self.current_scope, type="generic")
         # Update the symTab with functions names.
         if isinstance(node, FuncNode):
             self.current_scope = str(node.value)
@@ -65,7 +66,7 @@ class SemanticAnalyzer:
         # exists and has the right number of parameters.
         if isinstance(node, CallNode):
             found, _ = self.lookup(node=node, scope="global", parameters=self.length(node, ParamNode))
-            if not found:
+            if not found and node.value not in reserved:
                 self.error.append("Function " + node.value + " not defined.")
 
     # The function returns True if the object is in the symTab, False if not, with the index.
@@ -97,6 +98,8 @@ class SemanticAnalyzer:
             self.symTable.append((node.value, str(node.type), scope, parameters, length))
             return True
         else:
+            if type == "call":
+                type = "generic"
             # Save a value/func in symTab if type declared.
             self.symTable.append((node.value, type, scope, parameters, length))
             return True
@@ -131,3 +134,6 @@ class SemanticAnalyzer:
     def print_symtab(self):
         for i in range(len(self.symTable)):
             print(str(self.symTable[i]) + "\n", end="")
+
+    def get_symtab(self):
+        return self.symTable

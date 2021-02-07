@@ -1,8 +1,8 @@
 import ply.yacc as yacc
-from lexer import lexer, tokens
+from Lexer import lexer, tokens
 import argparse
-from Node import *
 from SemanticAnalyzer import *
+from CodeGenerator import *
 
 
 def p_program(p):
@@ -17,6 +17,10 @@ def p_program(p):
         semantic_checker.print_error()
         print("Translation failed: your code contains error.", file=sys.stderr)
     else:
+        f = open("output/main.java", "w")
+        codegenerator = CodeGenerator(semantic_checker.get_symtab())
+        codegenerator.generate(p[0], f)
+        f.close()
         print("Translation completed correctly.")
     p[0] = None
 
@@ -88,6 +92,10 @@ def p_assignment_statement(p):
 def p_call(p):
     '''call	: ID LPAR parameters RPAR
 	| ID LPAR RPAR
+	| PRINT LPAR value RPAR
+	| INPUT LPAR value RPAR
+	| INPUT LPAR RPAR
+	| PRINT LPAR RPAR
 	| ID FULLSTOP EXTEND LPAR value RPAR
 	| ID FULLSTOP EXTEND LPAR list RPAR'''
 
@@ -96,7 +104,7 @@ def p_call(p):
     if len(p) == 5:
         p[0] = CallNode(value=p[1], children=[p[3]])
     if len(p) == 7:
-        p[0] = CallNode(value=p[1], children=[p[5]])
+        p[0] = CallNode(value=p[3], children=[p[5]])
 
 def p_if_statement(p):
     '''if_statement : IF condition COLON INDENT statements DEDENT
@@ -122,7 +130,7 @@ def p_condition(p):
 
     if len(p) == 2:
         p[0] = ConditionNode(children=[p[1]])
-    if len(p) == 4 and p[1]=="(":
+    if len(p) == 4 and p[1] == "(":
         p[0] = ConditionNode(children=[p[2]])
     if len(p) == 4 and p[1] != "(":
         p[0] = ConditionNode(children=[p[1], p[2], p[3]])
@@ -147,6 +155,7 @@ def p_relop(p):
 def p_expression(p):
     '''expression : value PLUS expression
 	| value MINUS expression
+	| value TIMES expression
 	| value
 	| call
 	| list
@@ -225,6 +234,8 @@ ap.add_argument("-v", "--verbose", action="store_true")
 args = vars(ap.parse_args())
 data = args['input']
 data = open(data).read() + "\n"
+data = data[:-39]
+
 
 # Build the parser
 parser = yacc.yacc(debug=False, write_tables=False)
