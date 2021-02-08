@@ -18,9 +18,10 @@ def p_program(p):
         print("Translation failed: your code contains error.", file=sys.stderr)
     else:
         f = open("output/main.java", "w")
-        codegenerator = CodeGenerator(semantic_checker.get_symtab())
-        codegenerator.generate(p[0], f)
+        code_generator = CodeGenerator(semantic_checker.get_symtab())
+        code_generator.generate(p[0], f)
         f.close()
+        code_generator.post()
         print("Translation completed correctly.")
     p[0] = None
 
@@ -96,6 +97,7 @@ def p_call(p):
 	| INPUT LPAR value RPAR
 	| INPUT LPAR RPAR
 	| PRINT LPAR RPAR
+	| LEN LPAR expression RPAR
 	| ID FULLSTOP EXTEND LPAR value RPAR
 	| ID FULLSTOP EXTEND LPAR list RPAR'''
 
@@ -164,7 +166,7 @@ def p_expression(p):
 	| tuple PLUS expression'''
 
     if len(p) == 4:
-        p[0] = ExprNode(children=[p[1], p[3]])
+        p[0] = ExprNode(children=[p[1], p[3]], value=p[2])
     if len(p) == 2:
         p[0] = ExprNode(children=[p[1]])
 

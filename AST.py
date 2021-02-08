@@ -118,8 +118,9 @@ class RelopNode(AST):
 
 
 class ExprNode(AST):
-    def __init__(self, children):
+    def __init__(self, children, value=None):
         self.children = children
+        self.value = value
 
     def __repr__(self):
         return " ExprNode{ Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"

@@ -16,7 +16,8 @@ reserved = {
     'False': 'F_BOOL',
     'extend': 'EXTEND',
     'print': 'PRINT',
-    'input': 'INPUT'
+    'input': 'INPUT',
+    'len': 'LEN'
 }
 
 tokens = [
