@@ -13,7 +13,7 @@ class CodeGenerator:
     def generate(self, node, output):
         self.generate_code(node, output)
 
-    def generate_code(self, node, output):
+    def generate_code(self, node, output, isParam=True):
         global useful
         if isinstance(node, ProgramNode):
             output.write("public Class main{\n")
@@ -56,7 +56,9 @@ class CodeGenerator:
 
         if isinstance(node, ParamNode):
             for i in range(len(node.children)):
-                self.generate_code(node.children[i], output)
+                if not isinstance(node.children[i], ParamNode) and isParam:
+                    output.write("Object ")
+                self.generate_code(node.children[i], output, isParam)
                 if not isinstance(node.children[i], ParamNode):
                     output.write(", ")
 
@@ -84,10 +86,10 @@ class CodeGenerator:
                 output.write("Object")
             output.write(" " + str(node.value) + " = ")
             if str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_":
-                output.write("[")
+                output.write("{")
             self.generate_code(node.children[0], output)
             if str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_":
-                output.write("]")
+                output.write("}")
 
         if isinstance(node, CallNode):
             if node.value not in reserved:
@@ -98,15 +100,15 @@ class CodeGenerator:
                 output.write("(System.in)\n")
                 if len(node.children) == 1:
                     output.write("System.out.println(")
-                    self.generate_code(node.children[0], output)
+                    self.generate_code(node.children[0], output, False)
                     output.write(")\n")
-                output.write("Object input = " + str(useful) + ".nextLine()")
+                output.write("String input = " + str(useful) + ".nextLine()")
                 useful = None
             elif node.value == "print":
                 output.write("System.out.println")
                 output.write("(")
             if len(node.children) == 1 and node.value != "input":
-                self.generate_code(node.children[0], output)
+                self.generate_code(node.children[0], output, False)
                 output.write(")")
 
         if isinstance(node, IfNode):
@@ -149,7 +151,6 @@ class CodeGenerator:
         if isinstance(node, ValueNode):
             output.write(str(node.value))
 
-
     # The function returns the index.
     def lookup(self, value, scope, parameters=0, length=0):
         for i in range(len(self.symTable)):
@@ -171,9 +172,16 @@ class CodeGenerator:
         file.close()
         os.remove("output/main.java")
         file = open("output/main.java", "w")
+        array_type = ("String[]", "int[]", "float[]", "bool[]")
         for line in lines:
             if line[0] == "\n":
                 line = line[1:-1]
             if len(line) > 3 and line[-2] not in ("{", "}"):
                 line = line[0:-1] + ";" + line[-1]
+            if line.endswith(", ){\n") or line.endswith(", );\n"):
+                line = line[0:-5] + line[-3:]
+            if line.startswith(array_type):
+                line = line[0:-1] + ";\n"
             file.write(line)
+
+
