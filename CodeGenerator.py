@@ -41,8 +41,8 @@ class CodeGenerator:
                 if self.verify_return(node.children[1]):
                     output.write("public static Object " + str(node.value) + "(")
                 else:
-                    output.write("public static main " + str(node.value) + "(")
-                self.generate_code(node.children[0], output)
+                    output.write("public static void " + str(node.value) + "(")
+                self.generate_code(node.children[0], output, True)
                 output.write("){\n")
                 self.generate_code(node.children[1], output)
             else:
