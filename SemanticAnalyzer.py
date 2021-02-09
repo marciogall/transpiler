@@ -22,6 +22,7 @@ class SemanticAnalyzer:
             if isinstance(node.children[0].children[0], TupleNode):
                 node_type = "tuple"
                 node_type += "_"
+            print(node.children[0].children[0])
             if node.type != 'id':
                 node_type += str(node.type)
                 inserted = self.insert(node=node, scope=self.current_scope, type=node_type, length=self.length(node.children[0].children[0], (ListNode, TupleNode)))
@@ -53,11 +54,11 @@ class SemanticAnalyzer:
         # Check if a value exist in the symTab.
         if isinstance(node, ValueNode) and node.type == 'id':
             found, _ = self.lookup(node=node, scope=self.current_scope)
-            if not found and node.value != "__name__":
+            if not found and node.value != "__name__" and node.value not in reserved:
                 self.error.append(node.value + " not declared.")
             else:
-                found, _ = self.lookup(node=node, scope=self.current_scope, length=node.index)
-                if not found and node.value != "__name__":
+                found, __ = self.lookup(node=node, scope=self.current_scope, length=node.index)
+                if not found and node.value != "__name__" and node.value not in reserved:
                     self.error.append("Error with " + node.value + ": index out of range")
         # Recursion.
         for i in range(len(node.children)):
@@ -95,13 +96,13 @@ class SemanticAnalyzer:
     def insert(self, node, scope, type=None, parameters=0, length=0):
         if type is None:
             # Save a value in symTab if type not declared.
-            self.symTable.append((node.value, str(node.type), scope, parameters, length))
+            self.symTable.append([node.value, str(node.type), scope, parameters, length])
             return True
         else:
             if type == "call":
                 type = "generic"
             # Save a value/func in symTab if type declared.
-            self.symTable.append((node.value, type, scope, parameters, length))
+            self.symTable.append([node.value, type, scope, parameters, length])
             return True
 
     # Check the validity of an operation by checking if id inside it exists and have the same type.
@@ -137,3 +138,11 @@ class SemanticAnalyzer:
 
     def get_symtab(self):
         return self.symTable
+
+    def invalid_redeclaration(self, index=0):
+        a = (self.symTable[index][0], self.symTable[index][1], self.symTable[index][2])
+        for i in range(index, len(self.symTable)):
+            if a[0] == self.symTable[i][0] and a[2] == self.symTable[i][2] and not a[1] == self.symTable[i][1]:
+                self.error.append("Variable " + str(self.symTable[index][0] + " redeclared with different type."))
+        if index < len(self.symTable) - 1:
+            self.invalid_redeclaration(index + 1)

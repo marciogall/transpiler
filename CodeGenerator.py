@@ -16,7 +16,7 @@ class CodeGenerator:
     def generate_code(self, node, output, isParam=True):
         global useful
         if isinstance(node, ProgramNode):
-            output.write("public Class main{\n")
+            output.write("import java.util.Scanner\npublic class Example{\n")
             self.generate_code(node.children[0], output)
             output.write("\n}")
 
@@ -41,16 +41,18 @@ class CodeGenerator:
                 if self.verify_return(node.children[1]):
                     output.write("public static Object " + str(node.value) + "(")
                 else:
-                    output.write("public static void " + str(node.value) + "(")
+                    output.write("public static void " + str(node.value) + "(String[] args")
                 self.generate_code(node.children[0], output, True)
                 output.write("){\n")
+                output.write("Scanner input = new Scanner(System.in)\n")
                 self.generate_code(node.children[1], output)
             else:
                 if self.verify_return(node.children[0]):
                     output.write("public static Object " + str(node.value) + "(")
                 else:
-                    output.write("public static void " + str(node.value) + "(")
+                    output.write("public static void " + str(node.value) + "(String[] args")
                 output.write("){\n")
+                output.write("Scanner input = new Scanner(System.in)\n")
                 self.generate_code(node.children[0], output)
             output.write("}\n")
 
@@ -71,20 +73,38 @@ class CodeGenerator:
             node_type = str(self.symTable[i][1])
             if node_type == "str":
                 node_type = "String"
+            if node_type == "bool":
+                node_type = "boolean"
             elif node_type == "list_str":
                 node_type = "list_String"
             if node_type != "generic":
                 if node_type[0:5] == "list_":
-                    node_type = node_type[5:] + "[]"
+                    if node_type[5:] == "float":
+                        node_type = "Double[]"
+                    elif node_type[5:] == "int":
+                        node_type = "Integer[]"
+                    elif node_type[5:] == "bool":
+                        node_type = "Boolean[]"
+                    elif node_type[5:] == "str":
+                        node_type = "String[]"
                 elif node_type[0:6] == "tuple_":
-                    node_type = node_type[6:] + "[]"
+                    if node_type[6:] == "float":
+                        node_type = "Double[]"
+                    elif node_type[6:] == "int":
+                        node_type = "Integer[]"
+                    elif node_type[6:] == "bool":
+                        node_type = "Boolean[]"
+                    elif node_type[6:] == "str":
+                        node_type = "String[]"
+                if node_type == "float":
+                    output.write("double")
                 output.write(node_type)
             elif node.children[0].children[0].value == 'input':
-                output.write("Scanner")
                 useful = node.value
             else:
                 output.write("Object")
-            output.write(" " + str(node.value) + " = ")
+            if not node.children[0].children[0].value == 'input':
+                output.write(" " + str(node.value) + " = ")
             if str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_":
                 output.write("{")
             self.generate_code(node.children[0], output)
@@ -96,13 +116,11 @@ class CodeGenerator:
                 output.write(node.value)
                 output.write("(")
             elif node.value == "input":
-                output.write("new Scanner")
-                output.write("(System.in)\n")
                 if len(node.children) == 1:
                     output.write("System.out.println(")
                     self.generate_code(node.children[0], output, False)
                     output.write(")\n")
-                output.write("String input = " + str(useful) + ".nextLine()")
+                output.write("String " + str(useful) + " = input.nextLine()")
                 useful = None
             elif node.value == "print":
                 output.write("System.out.println")
@@ -149,12 +167,15 @@ class CodeGenerator:
                     output.write(", ")
 
         if isinstance(node, ValueNode):
-            output.write(str(node.value))
+            if node.value not in ("True", "False"):
+                output.write(str(node.value))
+            else:
+                output.write(str(node.value).lower())
 
     # The function returns the index.
     def lookup(self, value, scope, parameters=0, length=0):
         for i in range(len(self.symTable)):
-            if value == self.symTable[i][0] and scope in (self.symTable[i][2], "global"):
+            if value == self.symTable[i][0] and scope in (self.symTable[i][2], "global", None):
                 return i
 
     # verify if the function has a return
@@ -182,6 +203,15 @@ class CodeGenerator:
                 line = line[0:-5] + line[-3:]
             if line.startswith(array_type):
                 line = line[0:-1] + ";\n"
+            if line.startswith("Object"):
+                temp = line.split(" ")
+                _ = [temp[-1].split(";")[0]]
+                temp = temp[0:-1] + _
+                for i in range(3, len(temp), 2):
+                    if self.lookup(temp[i], None):
+                        temp[i] = "Double.parseDouble(" + temp[i] + ".toString())"
+                line = " ".join(temp)
+                line += ";\n"
             file.write(line)
 
 

@@ -13,6 +13,7 @@ def p_program(p):
     semantic_checker = SemanticAnalyzer()
     semantic_checker.analysis(p[0])
     semantic_checker.print_symtab()
+    semantic_checker.invalid_redeclaration()
     if len(semantic_checker.error) > 0:
         semantic_checker.print_error()
         print("Translation failed: your code contains error.", file=sys.stderr)
@@ -216,12 +217,15 @@ def p_value(p):
 
     if type(p[1]) == str and p[1][0] == "\"":
         p[0] = ValueNode(value=p[1], type="str")
-    elif (type(p[1]) == str and not p[1][0] == "\""):
+    elif type(p[1]) == str and not p[1][0] == "\"":
         p[0] = ValueNode(value=p[1], type="id")
     else:
         p[0] = ValueNode(value=p[1], type=type(p[1]).__name__)
     if len(p) == 5:
         p[0] = ValueNode(value=p[1], type="id", index=p[3])
+    if p[0].value in ("True", "False"):
+        p[0] = ValueNode(value=p[1], type="bool")
+
 
 
 # Error rule for syntax errors
