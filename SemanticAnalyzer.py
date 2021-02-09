@@ -22,7 +22,6 @@ class SemanticAnalyzer:
             if isinstance(node.children[0].children[0], TupleNode):
                 node_type = "tuple"
                 node_type += "_"
-            print(node.children[0].children[0])
             if node.type != 'id':
                 node_type += str(node.type)
                 inserted = self.insert(node=node, scope=self.current_scope, type=node_type, length=self.length(node.children[0].children[0], (ListNode, TupleNode)))

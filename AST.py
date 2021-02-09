@@ -123,7 +123,7 @@ class ExprNode(AST):
         self.value = value
 
     def __repr__(self):
-        return " ExprNode{ Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
+        return " ExprNode{ Value: " + str(self.value) + " Children: {" + str(self.children.__repr__()).split("[")[1].split("]")[0] + "}"
 
 
 class ListNode(AST):

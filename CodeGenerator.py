@@ -3,6 +3,7 @@ from Lexer import reserved
 import os
 
 useful = None
+concatenation = False
 
 
 class CodeGenerator:
@@ -15,8 +16,10 @@ class CodeGenerator:
 
     def generate_code(self, node, output, isParam=True):
         global useful
+        global concatenation
+
         if isinstance(node, ProgramNode):
-            output.write("import java.util.Scanner\npublic class Example{\n")
+            output.write("import java.util.Scanner\nimport java.util.Arrays\npublic class Example{\n")
             self.generate_code(node.children[0], output)
             output.write("\n}")
 
@@ -105,13 +108,16 @@ class CodeGenerator:
                 output.write("Object")
             if not node.children[0].children[0].value == 'input':
                 output.write(" " + str(node.value) + " = ")
-            if str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_":
-                output.write("{")
-            self.generate_code(node.children[0], output)
-            if str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_":
-                output.write("}")
+            if node.children[0].value == "+" and (str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_"):
+                concatenation = True
+                output.write("concatAll(")
+                self.generate_code(node.children[0], output, False)
+                output.write(")")
+            else:
+                self.generate_code(node.children[0], output)
 
         if isinstance(node, CallNode):
+            temp = False
             if node.value not in reserved:
                 output.write(node.value)
                 output.write("(")
@@ -125,8 +131,14 @@ class CodeGenerator:
             elif node.value == "print":
                 output.write("System.out.println")
                 output.write("(")
+                i = self.lookup(node.children[0].value, self.current_scope)
+                temp = str(self.symTable[i][1]).split("_")[0] in ("tuple", "list")
+                if temp:
+                    output.write("Arrays.toString(")
             if len(node.children) == 1 and node.value != "input":
                 self.generate_code(node.children[0], output, False)
+                output.write(")")
+            if temp:
                 output.write(")")
 
         if isinstance(node, IfNode):
@@ -157,14 +169,21 @@ class CodeGenerator:
         if isinstance(node, ExprNode):
             self.generate_code(node.children[0], output)
             if len(node.children) == 2:
-                output.write(" " + str(node.value) + " ")
-                self.generate_code(node.children[1], output)
+                if isParam:
+                    output.write(" " + str(node.value) + " ")
+                else:
+                    output.write(" , ")
+                self.generate_code(node.children[1], output, True)
 
         if isinstance(node, ListNode) or isinstance(node, TupleNode):
+            if isParam:
+                output.write("{")
             for i in range(len(node.children)):
-                self.generate_code(node.children[i], output)
+                self.generate_code(node.children[i], output, False)
                 if isinstance(node.children[i], ValueNode):
                     output.write(", ")
+            if isParam:
+                output.write("}")
 
         if isinstance(node, ValueNode):
             if node.value not in ("True", "False"):
@@ -193,7 +212,7 @@ class CodeGenerator:
         file.close()
         os.remove("output/main.java")
         file = open("output/main.java", "w")
-        array_type = ("String[]", "int[]", "float[]", "bool[]")
+        array_type = ("String[]", "Integer[]", "Double[]", "Boolean[]")
         for line in lines:
             if line[0] == "\n":
                 line = line[1:-1]
@@ -212,6 +231,13 @@ class CodeGenerator:
                         temp[i] = "Double.parseDouble(" + temp[i] + ".toString())"
                 line = " ".join(temp)
                 line += ";\n"
+            if line.startswith("public class") and concatenation:
+                line += "\n@SafeVarargs\npublic static <T> T[] concatAll(T[] first, T[]... rest) {\nint totalLength = " \
+                        "first.length;\nfor (T[] array : rest) {\ntotalLength += array.length;\n}\nT[] result =" \
+                        " Arrays.copyOf(first, totalLength);" \
+                        "\nint offset = first.length;\nfor (T[] array : rest) {\nSystem.arraycopy(array, 0, result, " \
+                        "offset, array.length);\n" \
+                        "offset += array.length;\n}\nreturn result;\n}\n"
             file.write(line)
 
 
