@@ -4,6 +4,7 @@ import os
 
 useful = None
 concatenation = False
+already_declared = []
 
 
 class CodeGenerator:
@@ -14,7 +15,7 @@ class CodeGenerator:
     def generate(self, node, output):
         self.generate_code(node, output)
 
-    def generate_code(self, node, output, isParam=True):
+    def generate_code(self, node, output, isParam=True, node_type=None):
         global useful
         global concatenation
 
@@ -44,7 +45,9 @@ class CodeGenerator:
                 if self.verify_return(node.children[1]):
                     output.write("public static Object " + str(node.value) + "(")
                 else:
-                    output.write("public static void " + str(node.value) + "(String[] args")
+                    output.write("public static void " + str(node.value) + "(")
+                    if self.current_scope == "main":
+                        output.write("String[] args")
                 self.generate_code(node.children[0], output, True)
                 output.write("){\n")
                 output.write("Scanner input = new Scanner(System.in)\n")
@@ -53,7 +56,9 @@ class CodeGenerator:
                 if self.verify_return(node.children[0]):
                     output.write("public static Object " + str(node.value) + "(")
                 else:
-                    output.write("public static void " + str(node.value) + "(String[] args")
+                    output.write("public static void " + str(node.value) + "(")
+                    if self.current_scope == "main":
+                        output.write("String[] args")
                 output.write("){\n")
                 output.write("Scanner input = new Scanner(System.in)\n")
                 self.generate_code(node.children[0], output)
@@ -74,44 +79,52 @@ class CodeGenerator:
         if isinstance(node, AssignNode):
             i = self.lookup(node.value, self.current_scope)
             node_type = str(self.symTable[i][1])
-            if node_type == "str":
-                node_type = "String"
-            if node_type == "bool":
-                node_type = "boolean"
-            elif node_type == "list_str":
-                node_type = "list_String"
-            if node_type != "generic":
-                if node_type[0:5] == "list_":
-                    if node_type[5:] == "float":
-                        node_type = "Double[]"
-                    elif node_type[5:] == "int":
-                        node_type = "Integer[]"
-                    elif node_type[5:] == "bool":
-                        node_type = "Boolean[]"
-                    elif node_type[5:] == "str":
-                        node_type = "String[]"
-                elif node_type[0:6] == "tuple_":
-                    if node_type[6:] == "float":
-                        node_type = "Double[]"
-                    elif node_type[6:] == "int":
-                        node_type = "Integer[]"
-                    elif node_type[6:] == "bool":
-                        node_type = "Boolean[]"
-                    elif node_type[6:] == "str":
-                        node_type = "String[]"
-                if node_type == "float":
-                    output.write("double")
-                output.write(node_type)
-            elif node.children[0].children[0].value == 'input':
-                useful = node.value
-            else:
-                output.write("Object")
+            if node.value not in already_declared:
+                if node_type == "str":
+                    node_type = "String"
+                if node_type == "bool":
+                    node_type = "boolean"
+                elif node_type == "list_str":
+                    node_type = "list_String"
+                elif node_type == "tuple_str":
+                    node_type = "tuple_String"
+                if node_type != "generic":
+                    if node_type[0:5] == "list_":
+                        if node_type[5:] == "float":
+                            node_type = "Double[]"
+                        elif node_type[5:] == "int":
+                            node_type = "Integer[]"
+                        elif node_type[5:] == "bool":
+                            node_type = "Boolean[]"
+                        elif node_type[5:] == "str":
+                            node_type = "String[]"
+                        elif node_type[6:] == "generic":
+                            node_type = "String[]"
+                    elif node_type[0:6] == "tuple_":
+                        if node_type[6:] == "float":
+                            node_type = "Double[]"
+                        elif node_type[6:] == "int":
+                            node_type = "Integer[]"
+                        elif node_type[6:] == "bool":
+                            node_type = "Boolean[]"
+                        elif node_type[6:] == "str":
+                            node_type = "String[]"
+                        elif node_type[7:] == "generic":
+                            node_type = "String[]"
+                    if node_type == "float":
+                        output.write("double")
+                    output.write(node_type)
+                elif node.children[0].children[0].value == 'input':
+                    useful = node.value
+                else:
+                    output.write("Object")
+            already_declared.append(str(node.value))
             if not node.children[0].children[0].value == 'input':
                 output.write(" " + str(node.value) + " = ")
             if node.children[0].value == "+" and (str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_"):
                 concatenation = True
                 output.write("concatAll(")
-                self.generate_code(node.children[0], output, False)
+                self.generate_code(node.children[0], output, False, node_type)
                 output.write(")")
             else:
                 self.generate_code(node.children[0], output)
@@ -132,13 +145,16 @@ class CodeGenerator:
                 output.write("System.out.println")
                 output.write("(")
                 i = self.lookup(node.children[0].value, self.current_scope)
-                temp = str(self.symTable[i][1]).split("_")[0] in ("tuple", "list")
+                if i is not None:
+                    temp = str(self.symTable[i][1]).split("_")[0] in ("tuple", "list")
                 if temp:
                     output.write("Arrays.toString(")
-            if len(node.children) == 1 and node.value != "input":
+            elif node.value == "len":
+                output.write(str(node.children[0].children[0].value) + ".length")
+            if len(node.children) == 1 and node.value not in ("input", "len"):
                 self.generate_code(node.children[0], output, False)
                 output.write(")")
-            if temp:
+            if temp and node.value != "len":
                 output.write(")")
 
         if isinstance(node, IfNode):
@@ -149,7 +165,7 @@ class CodeGenerator:
             output.write("}\n")
             if len(node.children) == 3:
                 output.write("else{\n")
-                self.generate_code(node.children[1], output)
+                self.generate_code(node.children[2], output)
                 output.write("\n}")
 
         if isinstance(node, WhileNode):
@@ -167,13 +183,15 @@ class CodeGenerator:
             output.write(" " + str(node.value) + " ")
 
         if isinstance(node, ExprNode):
+            if not isParam and node.children[0].type != "id":
+                output.write(" new " + node_type)
             self.generate_code(node.children[0], output)
             if len(node.children) == 2:
                 if isParam:
                     output.write(" " + str(node.value) + " ")
                 else:
                     output.write(" , ")
-                self.generate_code(node.children[1], output, True)
+                self.generate_code(node.children[1], output, isParam, node_type)
 
         if isinstance(node, ListNode) or isinstance(node, TupleNode):
             if isParam:
@@ -200,10 +218,10 @@ class CodeGenerator:
     # verify if the function has a return
     def verify_return(self, node):
         a = False
-        if node.children[0].value == 'return':
-            return True
-        if len(node.children) == 2:
-            a = self.verify_return(node.children[1])
+        for i in range(len(node.children)):
+            if isinstance(node.children[i], StatementNode) and node.children[i].value == 'return':
+                return True
+            a = self.verify_return(node.children[i])
         return a
 
     def post(self):
@@ -220,15 +238,20 @@ class CodeGenerator:
                 line = line[0:-1] + ";" + line[-1]
             if line.endswith(", ){\n") or line.endswith(", );\n"):
                 line = line[0:-5] + line[-3:]
-            if line.startswith(array_type):
+            if line.startswith(array_type) and not line.endswith(";\n"):
                 line = line[0:-1] + ";\n"
             if line.startswith("Object"):
                 temp = line.split(" ")
+                temp[0] = "Double"
                 _ = [temp[-1].split(";")[0]]
                 temp = temp[0:-1] + _
+                a = False
                 for i in range(3, len(temp), 2):
-                    if self.lookup(temp[i], None):
+                    a = self.lookup(temp[i], None)
+                    if a:
                         temp[i] = "Double.parseDouble(" + temp[i] + ".toString())"
+                if not a:
+                    temp = temp[0:3] + ["(Double)"] + temp[3:]
                 line = " ".join(temp)
                 line += ";\n"
             if line.startswith("public class") and concatenation:
@@ -239,5 +262,3 @@ class CodeGenerator:
                         "offset, array.length);\n" \
                         "offset += array.length;\n}\nreturn result;\n}\n"
             file.write(line)
-
-

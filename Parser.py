@@ -98,9 +98,7 @@ def p_call(p):
 	| INPUT LPAR value RPAR
 	| INPUT LPAR RPAR
 	| PRINT LPAR RPAR
-	| LEN LPAR expression RPAR
-	| ID FULLSTOP EXTEND LPAR value RPAR
-	| ID FULLSTOP EXTEND LPAR list RPAR'''
+	| LEN LPAR expression RPAR'''
 
     if len(p) == 4:
         p[0] = CallNode(value=p[1], children=[])
@@ -159,6 +157,7 @@ def p_expression(p):
     '''expression : value PLUS expression
 	| value MINUS expression
 	| value TIMES expression
+	| value MODULE expression
 	| value
 	| call
 	| list
@@ -212,7 +211,7 @@ def p_value(p):
 	| T_BOOL
 	| F_BOOL
 	| STRING
-	| ID LSQB INT RSQB'''
+	| ID LSQB value RSQB'''
 
 
     if type(p[1]) == str and p[1][0] == "\"":

@@ -14,7 +14,6 @@ reserved = {
     'return': 'RETURN',
     'True': 'T_BOOL',
     'False': 'F_BOOL',
-    'extend': 'EXTEND',
     'print': 'PRINT',
     'input': 'INPUT',
     'len': 'LEN'
@@ -43,9 +42,9 @@ tokens = [
              'DEDENT',
              'EQEQUAL',
              'LESSEQUAL',
-             'FULLSTOP',
              'STRING',
-             'TIMES'
+             'TIMES',
+             'MODULE'
          ] + list(reserved.values())
 
 t_EQUAL = '='
@@ -65,7 +64,7 @@ t_NOTEQUAL = '!='
 t_GREATEREQUAL = '>='
 t_EQEQUAL = '=='
 t_LESSEQUAL = '<='
-t_FULLSTOP = '\.'
+t_MODULE = '%'
 
 
 def t_STRING(t):
