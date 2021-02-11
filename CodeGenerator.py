@@ -20,7 +20,7 @@ class CodeGenerator:
         global concatenation
 
         if isinstance(node, ProgramNode):
-            output.write("import java.util.Scanner\nimport java.util.Arrays\npublic class Example{\n")
+            output.write("import java.util.Scanner\nimport java.util.Arrays\npublic class Output{\n")
             self.generate_code(node.children[0], output)
             output.write("\n}")
 
@@ -112,7 +112,7 @@ class CodeGenerator:
                         elif node_type[7:] == "generic":
                             node_type = "String[]"
                     if node_type == "float":
-                        output.write("double")
+                        node_type = "double"
                     output.write(node_type)
                 elif node.children[0].children[0].value == 'input':
                     useful = node.value
@@ -180,7 +180,14 @@ class CodeGenerator:
                 self.generate_code(node.children[i], output)
 
         if isinstance(node, RelopNode):
-            output.write(" " + str(node.value) + " ")
+            if node.value not in ("and", "or", "not"):
+                output.write(" " + str(node.value) + " ")
+            elif node.value == "and":
+                output.write(" & ")
+            elif node.value == "or":
+                output.write(" | ")
+            elif node.value == "not":
+                output.write(" !")
 
         if isinstance(node, ExprNode):
             if not isParam and node.children[0].type != "id":
@@ -225,11 +232,11 @@ class CodeGenerator:
         return a
 
     def post(self):
-        file = open("output/main.java")
+        file = open("output/Output.java")
         lines = file.readlines()
         file.close()
-        os.remove("output/main.java")
-        file = open("output/main.java", "w")
+        os.remove("output/Output.java")
+        file = open("output/Output.java", "w")
         array_type = ("String[]", "Integer[]", "Double[]", "Boolean[]")
         for line in lines:
             if line[0] == "\n":
@@ -240,7 +247,7 @@ class CodeGenerator:
                 line = line[0:-5] + line[-3:]
             if line.startswith(array_type) and not line.endswith(";\n"):
                 line = line[0:-1] + ";\n"
-            if line.startswith("Object"):
+            if line.startswith("Object") and not line.endswith(".length;\n"):
                 temp = line.split(" ")
                 temp[0] = "Double"
                 _ = [temp[-1].split(";")[0]]

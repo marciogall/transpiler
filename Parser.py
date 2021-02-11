@@ -3,27 +3,35 @@ from Lexer import lexer, tokens
 import argparse
 from SemanticAnalyzer import *
 from CodeGenerator import *
+import shutil
 
 
 def p_program(p):
     '''program : statements'''
     p[0] = ProgramNode(children=[p[1]])
+    ast_string = "AST TREE"
+    sym_string = "SYMTABLE"
     if args["verbose"]:
-        print(p[0])
+        print("\n\n" + ast_string.center(shutil.get_terminal_size().columns) + "\n\n")
+        print_tree(p[0].tree)
     semantic_checker = SemanticAnalyzer()
     semantic_checker.analysis(p[0])
-    semantic_checker.print_symtab()
+    if args["verbose"]:
+        print("\n\n" + sym_string.center(shutil.get_terminal_size().columns) + "\n\n")
+        semantic_checker.print_symtab()
     semantic_checker.invalid_redeclaration()
     if len(semantic_checker.error) > 0:
         semantic_checker.print_error()
         print("Translation failed: your code contains error.", file=sys.stderr)
     else:
-        f = open("output/main.java", "w")
+        f = open("output/Output.java", "w")
         code_generator = CodeGenerator(semantic_checker.get_symtab())
         code_generator.generate(p[0], f)
         f.close()
         code_generator.post()
         print("Translation completed correctly.")
+    if not args["verbose"]:
+        print("You can print the symtable and the Abstract Syntax Tree by running the same command with --verbose.")
     p[0] = None
 
 
@@ -240,7 +248,6 @@ args = vars(ap.parse_args())
 data = args['input']
 data = open(data).read() + "\n"
 data = data[:-39]
-
 
 # Build the parser
 parser = yacc.yacc(debug=False, write_tables=False)
