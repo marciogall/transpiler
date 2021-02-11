@@ -113,8 +113,10 @@ class SemanticAnalyzer:
                 node_type = self.symTable[index][1]
             else:
                 node_type = node.type
-            if node_type != type:
+            if node_type != type and type != "":
                 self.error.append("Invalid operation between " + str(type) + " and " + str(node_type) + ".")
+            if node_type != type and type == "":
+                self.error.append("Invalid operation between NoneType and " + str(node_type) + ".")
         if isinstance(node, ExprNode):
             # Recursion.
             for i in range(len(node.children)):
