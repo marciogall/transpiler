@@ -130,16 +130,20 @@ class SemanticAnalyzer:
                 counter = self.length(node.children[i], type, counter)
         return counter
 
+    # Print the error found.
     def print_error(self):
         print('\n'.join(self.error), file=sys.stderr)
 
+    # Pretty printing of the SymTab.
     def print_symtab(self):
         for i in range(len(self.symTable)):
             print(str(self.symTable[i]) + "\n", end="")
 
+    # Return the SymTab for the CodeGeneration part.
     def get_symtab(self):
         return self.symTable
 
+    # Verify redeclaration with different type.
     def invalid_redeclaration(self, index=0):
         a = (self.symTable[index][0], self.symTable[index][1], self.symTable[index][2])
         for i in range(index, len(self.symTable)):

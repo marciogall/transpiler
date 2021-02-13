@@ -63,12 +63,11 @@ It will also recognize this type of construction:
 - [x] assignment statements
 - [x] definition of a function
 - [x] call of a function
-- [x] comment
 - [x] return statements
 - [x] user input
 - [x] output of a single variable per instruction
 - [x] concatenation of lists or tuples
-- [x] length of a tuple
+- [x] length of lists or tuples
 
 We have worked on this type of error:
 - [x] grammar error (in particular wrong symbols, but it could be that some of them should be added) with relative row.

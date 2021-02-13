@@ -12,31 +12,28 @@ class CodeGenerator:
         self.symTable = symTable
         self.current_scope = None
 
-    def generate(self, node, output):
-        self.generate_code(node, output)
-
-    def generate_code(self, node, output, isParam=True, node_type=None):
+    def generate(self, node, output, isParam=True, node_type=None):
         global useful
         global concatenation
 
         if isinstance(node, ProgramNode):
             output.write("import java.util.Scanner\nimport java.util.Arrays\npublic class Output{\n")
-            self.generate_code(node.children[0], output)
+            self.generate(node.children[0], output)
             output.write("\n}")
 
         if isinstance(node, StatementsNode):
-            self.generate_code(node.children[0], output)
+            self.generate(node.children[0], output)
 
             if len(node.children) == 2:
-                self.generate_code(node.children[1], output)
+                self.generate(node.children[1], output)
 
         if isinstance(node, StatementNode):
             if node.value != "return":
-                self.generate_code(node.children[0], output)
+                self.generate(node.children[0], output)
             else:
                 output.write("return ")
                 for i in range(len(node.children)):
-                    self.generate_code(node.children[i], output)
+                    self.generate(node.children[i], output)
             output.write("\n")
 
         if isinstance(node, FuncNode):
@@ -48,10 +45,10 @@ class CodeGenerator:
                     output.write("public static void " + str(node.value) + "(")
                     if self.current_scope == "main":
                         output.write("String[] args")
-                self.generate_code(node.children[0], output, True)
+                self.generate(node.children[0], output, True)
                 output.write("){\n")
                 output.write("Scanner input = new Scanner(System.in)\n")
-                self.generate_code(node.children[1], output)
+                self.generate(node.children[1], output)
             else:
                 if self.verify_return(node.children[0]):
                     output.write("public static Object " + str(node.value) + "(")
@@ -61,20 +58,20 @@ class CodeGenerator:
                         output.write("String[] args")
                 output.write("){\n")
                 output.write("Scanner input = new Scanner(System.in)\n")
-                self.generate_code(node.children[0], output)
+                self.generate(node.children[0], output)
             output.write("}\n")
 
         if isinstance(node, ParamNode):
             for i in range(len(node.children)):
                 if not isinstance(node.children[i], ParamNode) and isParam:
                     output.write("Object ")
-                self.generate_code(node.children[i], output, isParam)
+                self.generate(node.children[i], output, isParam)
                 if not isinstance(node.children[i], ParamNode):
                     output.write(", ")
 
         if isinstance(node, AssignsNode):
             for i in range(len(node.children)):
-                self.generate_code(node.children[i], output)
+                self.generate(node.children[i], output)
 
         if isinstance(node, AssignNode):
             i = self.lookup(node.value, self.current_scope)
@@ -124,10 +121,10 @@ class CodeGenerator:
             if node.children[0].value == "+" and (str(self.symTable[i][1])[0:5] == "list_" or str(self.symTable[i][1])[0:6] == "tuple_"):
                 concatenation = True
                 output.write("concatAll(")
-                self.generate_code(node.children[0], output, False, node_type)
+                self.generate(node.children[0], output, False, node_type)
                 output.write(")")
             else:
-                self.generate_code(node.children[0], output)
+                self.generate(node.children[0], output)
 
         if isinstance(node, CallNode):
             temp = False
@@ -137,7 +134,7 @@ class CodeGenerator:
             elif node.value == "input":
                 if len(node.children) == 1:
                     output.write("System.out.println(")
-                    self.generate_code(node.children[0], output, False)
+                    self.generate(node.children[0], output, False)
                     output.write(")\n")
                 output.write("String " + str(useful) + " = input.nextLine()")
                 useful = None
@@ -152,32 +149,32 @@ class CodeGenerator:
             elif node.value == "len":
                 output.write(str(node.children[0].children[0].value) + ".length")
             if len(node.children) == 1 and node.value not in ("input", "len"):
-                self.generate_code(node.children[0], output, False)
+                self.generate(node.children[0], output, False)
                 output.write(")")
             if temp and node.value != "len":
                 output.write(")")
 
         if isinstance(node, IfNode):
             output.write("if (")
-            self.generate_code(node.children[0], output)
+            self.generate(node.children[0], output)
             output.write("){\n")
-            self.generate_code(node.children[1], output)
+            self.generate(node.children[1], output)
             output.write("}\n")
             if len(node.children) == 3:
                 output.write("else{\n")
-                self.generate_code(node.children[2], output)
+                self.generate(node.children[2], output)
                 output.write("\n}")
 
         if isinstance(node, WhileNode):
             output.write("while (")
-            self.generate_code(node.children[0], output)
+            self.generate(node.children[0], output)
             output.write("){\n")
-            self.generate_code(node.children[1], output)
+            self.generate(node.children[1], output)
             output.write("}\n")
 
         if isinstance(node, ConditionNode):
             for i in range(len(node.children)):
-                self.generate_code(node.children[i], output)
+                self.generate(node.children[i], output)
 
         if isinstance(node, RelopNode):
             if node.value not in ("and", "or", "not"):
@@ -192,19 +189,19 @@ class CodeGenerator:
         if isinstance(node, ExprNode):
             if not isParam and node.children[0].type != "id":
                 output.write(" new " + node_type)
-            self.generate_code(node.children[0], output)
+            self.generate(node.children[0], output)
             if len(node.children) == 2:
                 if isParam:
                     output.write(" " + str(node.value) + " ")
                 else:
                     output.write(" , ")
-                self.generate_code(node.children[1], output, isParam, node_type)
+                self.generate(node.children[1], output, isParam, node_type)
 
         if isinstance(node, ListNode) or isinstance(node, TupleNode):
             if isParam:
                 output.write("{")
             for i in range(len(node.children)):
-                self.generate_code(node.children[i], output, False)
+                self.generate(node.children[i], output, False)
                 if isinstance(node.children[i], ValueNode):
                     output.write(", ")
             if isParam:
