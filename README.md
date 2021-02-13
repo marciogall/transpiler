@@ -20,7 +20,7 @@ The --verbose option will return the Abstract Syntax Tree and the Symbol Table c
 A node of the AST is a Python dictionary:
 
 ``` 
-self.tree = {
+tree = {
     "node": NODE_NAME,
     "value": NODE_VALUE,
     "type": NODE_TYPE,
