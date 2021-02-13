@@ -84,4 +84,22 @@ We have worked on this type of error:
 
 In general the transpiler could be a little bit case specific.
 All the variables in input will be recognized as Strings and won't be casted, so if you are entering a number you will have to manually cast it in Java in order to use it for other scopes.
-All the numbers passed as Object in a function will be casted as Double. It's not so memory friendly, but it is effective.
+All the numbers passed as Object in a function will be casted as Double. It's not so memory friendly, but it's effective.
+The transpiler will work only with Python code so formed (the order of the functions doesn't matter, but it matters that all is defined in a function to better understand
+the scope of each variable):
+
+
+``` 
+def first_function(first_function_parameters):
+    # body of first function
+    
+[...]
+
+def n_function(n_function_parameters):
+    # body of n function
+    
+
+if __name__ == "__main__":
+    main()
+
+```
