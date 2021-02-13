@@ -273,7 +273,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,windows
 
-parser.out
-parsetab.py
-main.java
 case_use/*
+output/*
