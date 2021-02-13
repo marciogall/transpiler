@@ -98,6 +98,9 @@ def first_function(first_function_parameters):
 def n_function(n_function_parameters):
     # body of n function
     
+def main():
+    # body of main
+
 
 if __name__ == "__main__":
     main()
