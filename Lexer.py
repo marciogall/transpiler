@@ -1,5 +1,6 @@
 import ply.lex as lex
 from IndentLexer import IndentLexer
+import warnings
 
 
 # FIRST LEXING STAGE

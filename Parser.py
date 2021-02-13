@@ -24,7 +24,12 @@ def p_program(p):
         semantic_checker.print_error()
         print("Translation failed: your code contains error.", file=sys.stderr)
     else:
-        f = open("output/Output.java", "w")
+        try:
+            f = open("output/Output.java", "w")
+        except FileNotFoundError:
+            os.mkdir("output")
+        finally:
+            f = open("output/Output.java", "w")
         code_generator = CodeGenerator(semantic_checker.get_symtab())
         code_generator.generate(p[0], f)
         f.close()
@@ -234,7 +239,6 @@ def p_value(p):
         p[0] = ValueNode(value=p[1], type="bool")
 
 
-
 # Error rule for syntax errors
 
 def p_error(p):
@@ -249,8 +253,9 @@ data = args['input']
 data = open(data).read() + "\n"
 data = data[:-39]
 
+
 # Build the parser
-parser = yacc.yacc(debug=False, write_tables=False)
+parser = yacc.yacc(debug=False, write_tables=False, errorlog=yacc.NullLogger())
 
 while True:
     pars = parser.parse(data, lexer)

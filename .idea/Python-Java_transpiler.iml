@@ -6,7 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/case_use" />
       <excludeFolder url="file://$MODULE_DIR$/output" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (Python-Java_transpiler)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (transpiler)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
