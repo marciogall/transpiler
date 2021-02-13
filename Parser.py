@@ -251,8 +251,10 @@ ap.add_argument("-v", "--verbose", action="store_true")
 args = vars(ap.parse_args())
 data = args['input']
 data = open(data).read() + "\n"
-data = data[:-39]
-
+if data[-39:] == "if __name__ == '__main__':\n    main()\n\n":
+    data = data[:-39]
+else:
+    print("WARNING: Missing \"if __name__ == '__main__': main()\" at the end of file.", file=sys.stderr)
 
 # Build the parser
 parser = yacc.yacc(debug=False, write_tables=False, errorlog=yacc.NullLogger())
