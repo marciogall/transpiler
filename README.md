@@ -1,7 +1,6 @@
 # Transpiler from Python to Java
 
-This script is a proof of concept of a transpiler from Python to Java. It has been tested only on simple piece of code and it could be a little bit case specific, but it could be
-used as a starting part to create a more powerful Python transpiler.
+This script is a proof of concept of a transpiler from Python to Java. It has been tested only on simple piece of code and it could be a little bit case specific, but it could be used as a starting part to create a more powerful Python transpiler.
 This creation won't be possible without the help of @lauraloperfido and @AlessandroSchiavo
 
 
@@ -15,7 +14,26 @@ To run the transpiler, open a terminal in the directory and type the following c
 
 ``` python Parser.py -i/--input "path/to/input.py" [--verbose] ```
 
-The output will be readable in the directory "output/Output.java". The --verbose option will print in the terminal the Abstract Syntax Tree and the Symbol Table created while parsing.
+The output will be readable in the directory "output/Output.java".
+The --verbose option will return the Abstract Syntax Tree and the Symbol Table created while parsing.
+
+A node of the AST is a Python dictionary:
+
+``` 
+self.tree = {
+    "node": NODE_NAME,
+    "value": NODE_VALUE,
+    "type": NODE_TYPE,
+    "index": NODE_INDEX,
+    "children": NODE_CHILDREN (if any)
+}
+```
+
+The Symbol Table will be a list of list:
+
+``` 
+['VARIABLE_NAME', 'VARIABLE_TYPE', 'VARIABLE_SCOPE', 'FUNC_PARAMETERS', 'LENGTH']
+```
 
 ## Features
 
