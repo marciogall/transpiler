@@ -1,16 +1,18 @@
 # Transpiler from Python to Java
 
 This script is a proof of concept of a transpiler from Python to Java. It has been tested only on simple piece of code and it could be a little bit case specific, but it could be used as a starting part to create a more powerful Python transpiler.
-This creation won't be possible without the help of @lauraloperfido and @AlessandroSchiavo
+This creation coudln't be possible without the help of @lauraloperfido and @AlessandroSchiavo.
 
 
 ## Usage
 
-Before using the transpiler, make sure you have installed all the requirements by running in a terminal. Consider using a virtual environment.
+Before using the transpiler, make sure you have installed all the requirements by running the following command in a terminal.
 
 ``` pip install -r requirements.txt ```
 
-To run the transpiler, open a terminal in the directory and type the following command:
+Consider also using a virtual environment.
+
+To run the transpiler, open a terminal in the project directory and type the following command:
 
 ``` python Parser.py -i/--input "path/to/input.py" [--verbose] ```
 
@@ -29,15 +31,15 @@ tree = {
 }
 ```
 
-The Symbol Table will be a list of list:
+The Symbol Table will be a list of lists:
 
-``` 
+```
 ['VARIABLE_NAME', 'VARIABLE_TYPE', 'VARIABLE_SCOPE', 'FUNC_PARAMETERS', 'LENGTH']
 ```
 
 ## Features
 
-The transpiler will work with this type of data (in Python):
+The transpiler will work with these types of data (in Python):
 - [x] int
 - [ ] long
 - [x] float
@@ -51,10 +53,10 @@ The transpiler will work with this type of data (in Python):
 - [ ] set
 - [ ] file
 
-It will also recognize this type of construction:
+It will also recognize these types of operations:
 - [x] sum of two numbers
-- [x] difference of two numbers
-- [x] product of two numbers
+- [x] difference between two numbers
+- [x] multiplication of two numbers
 - [ ] division of two numbers
 - [x] module of two numbers
 - [x] if statements
@@ -69,22 +71,21 @@ It will also recognize this type of construction:
 - [x] concatenation of lists or tuples
 - [x] length of lists or tuples
 
-We have worked on this type of error:
-- [x] grammar error (in particular wrong symbols, but it could be that some of them should be added) with relative row.
-- [x] syntax error, with relative row. Because of the type of parsing ply does, the shift-reduce one, with complex structure the error will be found at the end of the specific production.
+We have worked on these types of errors:
+- [x] grammar error (wrong symbols sometimes are missing) with relative row.
+- [x] syntax error, with relative row. Because of the type of parsing ply does, the shift-reduce one, with complex structures the error will be found at the end of the specific rule.
 - [x] semantic errors:
-  - [x] declaration of a variable.
-  - [x] redeclaration of a variable with the different type. This is an error in Java, not in Python.
-  - [x] declaration of a function.
+  - [x] missing declaration of a variable.
+  - [x] redeclaration of a variable with a different type (this is an error in Java, not in Python).
+  - [x] missing declaration of a function.
   - [x] invalid operation between different types.
   - [x] list/tuple index out of range.
 
 ## Known Issues
 
 All the variables in input will be recognized as Strings and won't be casted, so if you are entering a number you will have to manually cast it in Java in order to use it for other scopes.
-All the numbers passed as Object in a function will be casted as Double. It's not so memory friendly, but it's effective.
-The transpiler will work only with Python code so formed (the order of the functions doesn't matter, but it matters that all is defined in a function to better understand
-the scope of each variable):
+All the numbers passed as Object in a function will be casted as Double.
+The transpiler will work only with Python code built this way (the order of the functions doesn't matter, but it's important that everything is defined in a function to better understand the scope of each variable):
 
 
 ``` 
