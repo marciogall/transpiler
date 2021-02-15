@@ -72,7 +72,7 @@ It will also recognize these types of operations:
 - [x] length of lists or tuples
 
 We have worked on these types of errors:
-- [x] grammar error (wrong symbols sometimes are missing) with relative row.
+- [x] lexical error (wrong symbols sometimes are missing) with relative row.
 - [x] syntax error, with relative row. Because of the type of parsing ply does, the shift-reduce one, with complex structures the error will be found at the end of the specific rule.
 - [x] semantic errors:
   - [x] missing declaration of a variable.
