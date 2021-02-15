@@ -25,7 +25,7 @@ tree = {
     "value": NODE_VALUE,
     "type": NODE_TYPE,
     "index": NODE_INDEX,
-    "children": NODE_CHILDREN (if any)
+    "children": NODE_CHILDREN
 }
 ```
 
