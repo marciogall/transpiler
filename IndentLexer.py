@@ -89,4 +89,4 @@ class IndentLexer:
         return i
 
     def error(self):
-        print("Grammar error at line {}".format(self.linenumber))
+        print("Lexical error at line {}".format(self.linenumber))
