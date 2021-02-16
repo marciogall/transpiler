@@ -1,12 +1,12 @@
 def print_tree(d, indent=0):
-    print("\t" * indent + "{")
+    print('    ' * indent + "{")
     for key, value in d.items():
-        print('\t' * indent + str(key) + ":")
+        print('    ' * indent + str(key) + ":")
         if isinstance(value, dict):
             print_tree(value, indent + 1)
         else:
-            print('\t' * (indent+1) + str(value))
-    print('\n' + '\t' * indent + "}")
+            print('    ' * (indent + 1) + str(value))
+    print('\n' + '    ' * indent + "}")
 
 
 class AST:

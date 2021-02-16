@@ -17,7 +17,7 @@ class CodeGenerator:
         global concatenation
 
         if isinstance(node, ProgramNode):
-            output.write("import java.util.Scanner\nimport java.util.Arrays\npublic class Output{\n")
+            output.write("import java.util.Scanner\nimport java.util.Arrays\npublic class output{\n")
             self.generate(node.children[0], output)
             output.write("\n}")
 
@@ -229,11 +229,11 @@ class CodeGenerator:
         return a
 
     def post(self):
-        file = open("output/Output.java")
+        file = open("output/output.java")
         lines = file.readlines()
         file.close()
-        os.remove("output/Output.java")
-        file = open("output/Output.java", "w")
+        os.remove("output/output.java")
+        file = open("output/output.java", "w")
         array_type = ("String[]", "Integer[]", "Double[]", "Boolean[]")
         for line in lines:
             if line[0] == "\n":

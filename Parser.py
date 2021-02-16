@@ -25,11 +25,11 @@ def p_program(p):
         print("Translation failed: your code contains error.", file=sys.stderr)
     else:
         try:
-            f = open("output/Output.java", "w")
+            f = open("output/output.java", "w")
         except FileNotFoundError:
             os.mkdir("output")
         finally:
-            f = open("output/Output.java", "w")
+            f = open("output/output.java", "w")
         code_generator = CodeGenerator(semantic_checker.get_symtab())
         code_generator.generate(p[0], f)
         f.close()
