@@ -242,7 +242,7 @@ def p_value(p):
 # Error rule for syntax errors
 
 def p_error(p):
-    print("Syntax Error at line {}".format(lexer.linenumber))
+    print(f"Syntax Error at line {p.lineno}", file=sys.stderr)
 
 
 ap = argparse.ArgumentParser()

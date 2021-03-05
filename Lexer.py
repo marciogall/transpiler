@@ -1,6 +1,8 @@
+import sys
+
 import ply.lex as lex
-from IndentLexer import IndentLexer
-import warnings
+
+indentation_stack = [0]
 
 
 # FIRST LEXING STAGE
@@ -50,7 +52,6 @@ tokens = [
 
 t_EQUAL = '='
 t_COLON = ':'
-t_WHITESPACE = r'\n[ ]*'
 t_LPAR = '\('
 t_RPAR = '\)'
 t_LSQB = '\['
@@ -92,6 +93,31 @@ def t_NUMBER(t):
         return t
 
 
+def t_WHITESPACE(t):
+    r'\n[ ]*'
+    t.lexer.lineno += 1
+    t.value = t.value[1:]
+    t.lexer.level = len(t.value)
+    if t.lexer.level > indentation_stack[-1]:
+        t.type = 'INDENT'
+        indentation_stack.append(t.lexer.level)
+        return t
+    elif t.lexer.level == indentation_stack[-1] - 4:
+        t.type = 'DEDENT'
+        indentation_stack.append(t.lexer.level)
+        return t
+
+
+def t_eof(t):
+    i = t.lexer.level
+    if indentation_stack[-1] == 0:
+        return
+    while i < indentation_stack[-1]:
+        t.type = 'DEDENT'
+        indentation_stack.append(indentation_stack[-1] - 4)
+        return t
+
+
 def t_COMMENT(t):
     r'\#.*'
     pass
@@ -101,7 +127,7 @@ t_ignore = ' \t;'
 
 
 def t_error(t):
-    lexer.error()
+    print(f"Lexical error at line {t.lexer.lineno}", file=sys.stderr)
     t.lexer.skip(1)
 
 
@@ -109,16 +135,15 @@ def t_error(t):
 lexer = lex.lex()
 
 
-# create our second stage
-lexer = IndentLexer(lexer)
-
 # DE-COMMENT TO TEST ALONE
 #
 # data = '''
-# a = 6
+# a = 1
 # if a < 6:
-#     e = 2
-#
+#     c = 1
+#     while a < 6:
+#         c = 2
+# '''
 #
 # lexer.input(data)
 #
