@@ -5,7 +5,6 @@ import ply.lex as lex
 indentation_stack = [0]
 
 
-# FIRST LEXING STAGE
 reserved = {
     'if': 'IF',
     'else': 'ELSE',
@@ -131,7 +130,6 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-# create our first stage
 lexer = lex.lex()
 
 
