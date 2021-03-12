@@ -80,7 +80,11 @@ We have worked on these types of errors:
 ## Known Issues
 
 All the variables in input will be recognized as Strings and won't be casted, so if you are entering a number you will have to manually cast it in Java in order to use it for other scopes.
+
+The indentation level will be computed for every line of code: this means that also whitelines have to be indented as well.
+
 All the numbers passed as Object in a function will be casted as Double.
+
 The transpiler will work only with Python code built this way (the order of the functions doesn't matter, but it's important that everything is defined in a function to better understand the scope of each variable):
 
 
