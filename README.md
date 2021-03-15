@@ -6,11 +6,13 @@ This creation couldn't be possible without the help of @lauraloperfido and @Ales
 
 ## Usage
 
-You can compile the code with the help of PyInstaller.
+Before using the transpiler, make sure you have installed all the requirements by running in a terminal. Consider using a virtual environment.
 
-After you've done it, you can run the transpiler by opening a terminal in the project directory and typing the following command:
+``` pip install -r requirements.txt ```
 
-``` transpiler.exe -i/--input "path/to/input.py" [--verbose] ```
+To run the transpiler, open a terminal in the directory and type the following command:
+
+``` python Parser.py -i/--input "path/to/input.py" [--verbose] ```
 
 The output will be readable in the directory "output/output.java".
 The --verbose option will return the Abstract Syntax Tree and the Symbol Table created while parsing.
