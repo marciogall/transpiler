@@ -94,7 +94,6 @@ def t_NUMBER(t):
 
 def t_WHITESPACE(t):
     r'\n[ ]*'
-    print(indentation_stack)
     t.lexer.lineno += 1
     t.lexer.level = len(t.value[1:])
     if t.lexer.level > indentation_stack[-1]:
@@ -107,16 +106,6 @@ def t_WHITESPACE(t):
         if indentation_stack[-1] > t.lexer.level:
             t.lexer.skip(-len(t.value))
         return t
-
-
-# def t_eof(t):
-#     i = t.lexer.level
-#     if indentation_stack[-1] == 0:
-#         return
-#     while i < indentation_stack[-1]:
-#         t.type = 'DEDENT'
-#         indentation_stack.append(indentation_stack[-1] - 4)
-#         return t
 
 
 def t_COMMENT(t):
@@ -136,23 +125,23 @@ lexer = lex.lex()
 
 
 # DE-COMMENT TO TEST ALONE
-
-data = '''a = 1
-if a < 6:
-    c = 1
-    while a < 6:
-        c = 2
-        if a < 6:
-            c = 1
-            
-        if a < 24:
-            c = 32
-'''
-
-lexer.input(data)
-
-while True:
-    tok = lexer.token()
-    if not tok:
-        break
-    print(tok)
+#
+# data = '''a = 1
+# if a < 6:
+#     c = 1
+#     while a < 6:
+#         c = 2
+#         if a < 6:
+#             c = 1
+#
+#         if a < 24:
+#             c = 32
+# '''
+#
+# lexer.input(data)
+#
+# while True:
+#     tok = lexer.token()
+#     if not tok:
+#         break
+#     print(tok)
